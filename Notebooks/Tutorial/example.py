@@ -54,6 +54,7 @@ plt.tick_params(direction='in')
 plt.title(f'Light curve of {asteroid}')
 plt.xlabel('Time (yr)')
 plt.ylabel('Flux (mJy)')
+plt.savefig('Erminia_lcurve_from_script.pdf')
 plt.show()
 
 print("Running find_ast() function for Vesta and Ceres...")
