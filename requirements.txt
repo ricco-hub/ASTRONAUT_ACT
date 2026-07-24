@@ -6,3 +6,5 @@ s3fs>=2023.10.0
 seaborn>=0.12 # optional
 ipykernel>=7.1.0
 ipynbname>=2025.8.0.0
+notebook
+astroquery
