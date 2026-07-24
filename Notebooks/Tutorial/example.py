@@ -1,8 +1,8 @@
 """
 This script follows the Tutorial notebook and can be run independently of it.
 The relevant sections outlined here are: import relevant libraries, 
-request and extract data, generate light curve data, and run the find_ast()
-function.
+request and extract data, generate light curve data, run the find_ast() function
+and compare to Redman et al. 1998 data.
 """
 
 print("Running example.py")
@@ -10,13 +10,16 @@ print("Importing libraries...")
 # import libraries
 import sys
 import os
+import numpy as np
 import matplotlib.pyplot as plt
 
 from astropy.io import fits
 from astropy.time import Time
+from astroquery.jplhorizons import Horizons
+from astroquery.mpc import MPC
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from ast_ftns import find_ast
+from ast_ftns import find_ast, get_ast_weighted_flux
 
 
 # create request to ACTeroids container
@@ -63,3 +66,28 @@ find_ast("Vesta")
 
 print("Ceres:")
 find_ast("Ceres")
+
+print("Comparing to Redman et al. 1998...")
+# create request to ACTeroids container
+ast = 'Ceres'
+array = 'pa5'
+freq = '150'
+flux_act, var_act = get_ast_weighted_flux(ast=ast, array=array, freq=freq)
+
+# Redman et al. 1998
+# https://iopscience.iop.org/article/10.1086/300495/fulltext/
+# Table 3
+redman_flux = 463
+redman_err = 58
+redman_r = 2.927
+redman_delta = 2.844
+obj = Horizons(id='Ceres', location='568',
+               epochs={'start':'1993-07-17', 'stop':'1993-07-18',
+                       'step':'1h'})
+eph = obj.ephemerides()
+alpha = np.mean(eph["alpha"])
+weight_redman = redman_delta**-2 * redman_r**(-1/2) * 10**(-0.004*alpha) # Note missing alpha parameter 
+eph = MPC.get_ephemeris('24')
+
+print("Redman1998 93/07 flux: ", redman_flux, "+\-", redman_err)
+print("ACT PA5 flux, scaled to Redman 93/07 Geometry: ", flux_act*weight_redman, "+\-", np.sqrt(var_act)*weight_redman)
